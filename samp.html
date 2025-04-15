@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲界面</title>
+	<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #292520;
+            border: 2px solid #6e5c3e;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 頂部導航欄 */
+        .top-nav {
+            display: flex;
+            background: linear-gradient(to bottom, #3d3223, #251e14);
+            border-bottom: 1px solid #6e5c3e;
+            padding: 5px 0;
+            position: relative;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            width: 25%;
+        }
+
+        .level-display {
+            background-color: #251e14;
+            border: 1px solid #c7a758;
+            border-radius: 5px;
+            padding: 2px 5px;
+            margin-right: 10px;
+            color: #c7a758;
+            font-weight: bold;
+        }
+
+        .player-stats {
+            font-size: 12px;
+            color: #ecdbaf;
+        }
+
+        .top-menu {
+            display: flex;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .top-menu-item {
+            background: linear-gradient(to bottom, #4a3f2f, #29241a);
+            border: 1px solid #6e5c3e;
+            border-radius: 5px;
+            padding: 5px 15px;
+            margin: 0 5px;
+            color: #ecdbaf;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .top-menu-item.active {
+            background: linear-gradient(to bottom, #c7a758, #8a7437);
+            color: #251e14;
+        }
+
+        .top-menu-item:hover {
+            background: linear-gradient(to bottom, #6e5c3e, #4a3f2f);
+        }
+
+        .currency {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            display: flex;
+            align-items: center;
+            color: #ecdbaf;
+            font-size: 12px;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+
+        .currency-icon {
+            width: 16px;
+            height: 16px;
+            background-color: #c7a758;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        /* 中間內容區域 */
+        .main-content {
+            display: flex;
+            padding: 15px;
+            background-color: #29241a;
+            border-bottom: 1px solid #6e5c3e;
+        }
+
+        .character-info {
+            width: 30%;
+            padding: 10px;
+            background-color: #251e14;
+            border: 1px solid #6e5c3e;
+            border-radius: 5px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 5px;
+            padding: 2px 0;
+            border-bottom: 1px solid #3d3223;
+        }
+
+        .info-label {
+            width: 30%;
+            color: #c7a758;
+        }
+
+        .info-value {
+            width: 70%;
+            color: #ffffff;
+        }
+
+        /* 稀有度星星的顏色設置 */
+        .rarity-stars span {
+            display: inline-block;
+            margin-right: 2px;
+        }
+
+        .star-white {
+            color: #ffffff;
+        }
+
+        .star-blue {
+            color: #3498db;
+        }
+
+        .star-red {
+            color: #e74c3c;
+        }
+
+        .star-yellow {
+            color: #f1c40f;
+        }
+
+        .star-empty {
+            color: #7f8c8d;
+            opacity: 0.5;
+        }
+
+        .stats-value {
+            display: flex;
+            align-items: center;
+        }
+
+        .modifier {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+
+        .positive {
+            color: #4caf50;
+        }
+
+        .hp-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #3d3223;
+            border-radius: 3px;
+            margin-top: 3px;
+            position: relative;
+        }
+
+        .hp-fill {
+            height: 100%;
+            width: 100%;
+            background-color: #b71c1c;
+            border-radius: 3px;
+        }
+
+        .stats-chart {
+            width: 40%;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hexagon {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+
+        .hexagon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .equip-section {
+            width: 30%;
+            padding: 10px;
+            background-color: #251e14;
+            border: 1px solid #6e5c3e;
+            border-radius: 5px;
+        }
+
+        .equip-title {
+            color: #c7a758;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #6e5c3e;
+            padding-bottom: 5px;
+        }
+
+        .equip-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 3px;
+            background-color: #29241a;
+            border-radius: 3px;
+        }
+
+        .equip-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #6e5c3e;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+
+        .equip-name {
+            flex-grow: 1;
+            color: #ecdbaf;
+            font-size: 14px;
+        }
+
+        .equip-level {
+            color: #c7a758;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        /* 底部角色選擇區域 */
+        .character-selection {
+            padding: 15px;
+            background-color: #29241a;
+        }
+
+        .characters {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .character {
+            width: 18%;
+            text-align: center;
+            position: relative;
+        }
+
+        /* 修改角色頭像容器樣式 */
+        .character-avatar {
+            width: 80px;
+            height: 100px;
+            background-color: #251e14;
+            border: 1px solid #6e5c3e;
+            margin: 0 auto 5px;
+            position: relative;
+            overflow: hidden; /* 防止圖片溢出容器 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* 添加陰影效果 */
+        }
+
+        /* 修改角色圖片樣式，確保圖片底部對齊 */
+        .character-avatar img {
+            display: block;
+            width: 130%;
+            height: auto;
+            position: absolute;
+            bottom: 0; /* 確保圖片底部對齊 */
+            left: -15px;
+            object-fit: contain; /* 保持圖片比例 */
+            object-position: bottom; /* 確保圖片底部對齊 */
+        }
+
+        /* 修改角色等級樣式，確保在陰影框內且底部對齊 */
+        .character-level {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: rgba(37, 30, 20, 0.8);
+            border: 1px solid #c7a758;
+            border-radius: 3px;
+            padding: 1px 3px;
+            font-size: 10px;
+            color: #ecdbaf;
+            margin: 2px; /* 添加間距，確保在陰影內 */
+            z-index: 1; /* 確保在圖片上方 */
+        }
+
+        .character-exp {
+            width: 100%;
+            height: 8px;
+            background-color: #3d3223;
+            border-radius: 4px;
+        }
+
+        .character-exp-fill {
+            height: 100%;
+            width: 70%;
+            background-color: #c7a758;
+            border-radius: 4px;
+        }
+
+        .bottom-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .bottom-button {
+            background: linear-gradient(to bottom, #4a3f2f, #29241a);
+            border: 1px solid #6e5c3e;
+            border-radius: 5px;
+            padding: 5px 15px;
+            margin: 0 10px;
+            color: #ecdbaf;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .bottom-button:hover {
+            background: linear-gradient(to bottom, #6e5c3e, #4a3f2f);
+        }
+    </style>
+	</head>
+<body>
+    <div class="container">
+        <!-- 頂部導航欄 -->
+        <div class="top-nav">
+            <div class="player-info">
+                <div class="level-display">LV 43</div>
+                <div class="player-stats">
+                    <div>小睿</div>
+                    <div>經驗: 110639/70468</div>
+                </div>
+            </div>
+            <div class="top-menu">
+                <div class="top-menu-item">魔女</div>
+                <div class="top-menu-item active">冒險者</div>
+                <div class="top-menu-item">道師</div>
+                <div class="top-menu-item">城邦</div>
+                <div class="top-menu-item">住宿</div>
+                <div class="top-menu-item">商店</div>
+                <div class="top-menu-item">魔界船</div>
+                <div class="top-menu-item">勝物</div>
+            </div>
+            <div class="currency">
+                <div class="currency-item">
+                    <div class="currency-icon"></div>
+                    <span>28654</span>
+                </div>
+                <div class="currency-item">
+                    <div class="currency-icon"></div>
+                    <span>9874</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中間內容區域 -->
+        <div class="main-content">
+            <div class="character-info">
+                <div class="info-row">
+                    <div class="info-label">稀有度</div>
+                    <div class="info-value rarity-stars">
+                        <span class="star-white">★</span>
+                        <span class="star-white">★</span>
+                        <span class="star-blue">★</span>
+                        <span class="star-blue">★</span>
+                        <span class="star-blue">★</span>
+                        <span class="star-red">★</span>
+                        <span class="star-red">★</span>
+                        <span class="star-red">★</span>
+                        <span class="star-empty">☆</span>
+                        <span class="star-empty">☆</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">好感度</div>
+                    <div class="info-value">❤❤❤❤❤❤❤❤</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">名稱</div>
+                    <div id="character-name" class="info-value">銀月</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Lv</div>
+                    <div class="info-value">49</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">EXP</div>
+                    <div class="info-value">0%</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">HP</div>
+                    <div class="info-value">
+                        <div>428/428</div>
+                        <div class="hp-bar">
+                            <div class="hp-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">攻擊力</div>
+                    <div class="info-value stats-value">
+                        97 <span class="modifier positive">(+34)</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">防禦力</div>
+                    <div class="info-value stats-value">
+                        102 <span class="modifier positive">(+38)</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">命中</div>
+                    <div class="info-value stats-value">
+                        45 <span class="modifier positive">(+22)</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">迴避</div>
+                    <div class="info-value stats-value">
+                        39 <span class="modifier positive">(+22)</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">幸運</div>
+                    <div class="info-value stats-value">
+                        44 <span class="modifier positive">(+17)</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">移動力</div>
+                    <div class="info-value">4</div>
+                </div>
+            </div>
+
+            <div class="stats-chart">
+                <div class="hexagon">
+                    <svg viewBox="0 0 200 200">
+                        <polygon points="100,10 190,75 150,180 50,180 10,75" fill="none" stroke="#6e5c3e" stroke-width="1" />
+                        <polygon points="100,40 160,85 130,150 70,150 40,85" fill="rgba(199, 167, 88, 0.3)" stroke="#c7a758" stroke-width="2" />
+                        <text x="100" y="5" fill="#ecdbaf" text-anchor="middle" font-size="12">HP</text>
+                        <text x="195" y="75" fill="#ecdbaf" text-anchor="middle" font-size="12">攻</text>
+                        <text x="155" y="190" fill="#ecdbaf" text-anchor="middle" font-size="12">防</text>
+                        <text x="45" y="190" fill="#ecdbaf" text-anchor="middle" font-size="12">命</text>
+                        <text x="5" y="75" fill="#ecdbaf" text-anchor="middle" font-size="12">迴</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="equip-section">
+                <div class="equip-title">全部(37) 39/40</div>
+                <div class="equip-item">
+                    <div class="equip-icon"></div>
+                    <div class="equip-name">S級強者道章（★5）</div>
+                    <div class="equip-level">20</div>
+                </div>
+                <div class="equip-item">
+                    <div class="equip-icon"></div>
+                    <div class="equip-name">B級強血道章（★5）</div>
+                    <div class="equip-level">40</div>
+                </div>
+                <div class="equip-item">
+                    <div class="equip-icon"></div>
+                    <div class="equip-name">B級界天道章（★5）</div>
+                    <div class="equip-level">20</div>
+                </div>
+                <div class="equip-item">
+                    <div class="equip-icon"></div>
+                    <div class="equip-name">S級極風魔石（★5）</div>
+                    <div class="equip-level">20</div>
+                </div>
+                <div class="equip-item">
+                    <div class="equip-icon"></div>
+                    <div class="equip-name">S級極風魔石（★5）</div>
+                    <div class="equip-level">20</div>
+                </div>
+                <div class="equip-item">
+                    <div class="equip-icon"></div>
+                    <div class="equip-name">S級蒼鷹勾玉（★5）</div>
+                    <div class="equip-level">20</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部角色選擇區域 -->
+        <div class="character-selection">
+            <div class="characters">
+                <div class="character">
+                    <div class="character-avatar" data-card="card1">
+						<img src="stay1.gif" alt="卡片1">
+                        <div class="character-level">Lv.47</div>
+                    </div>
+                    <div class="character-exp">
+                        <div class="character-exp-fill"></div>
+                    </div>
+                </div>
+                <div class="character">
+                    <div class="character-avatar" data-card="card2">
+						<img src="stay2.gif" alt="卡片2">
+                        <div class="character-level">Lv.47</div>
+                    </div>
+                    <div class="character-exp">
+                        <div class="character-exp-fill"></div>
+                    </div>
+                </div>
+                <div class="character">
+                    <div class="character-avatar" data-card="card3">
+						<img src="stay3.gif" alt="卡片2">
+                        <div class="character-level">Lv.48</div>
+                    </div>
+                    <div class="character-exp">
+                        <div class="character-exp-fill"></div>
+                    </div>
+                </div>
+                <div class="character">
+                    <div class="character-avatar" data-card="card4">
+						<img src="stay4.gif" alt="卡片2">
+                        <div class="character-level">Lv.40</div>
+                    </div>
+                    <div class="character-exp">
+                        <div class="character-exp-fill"></div>
+                    </div>
+                </div>
+                <div class="character">
+                    <div class="character-avatar">
+                        <div class="character-level">Lv.40</div>
+                    </div>
+                    <div class="character-exp">
+                        <div class="character-exp-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-buttons">
+                <div class="bottom-button">聯合</div>
+                <div class="bottom-button">咖啡</div>
+                <div class="bottom-button">私人</div>
+                <div class="bottom-button">資訊</div>
+                <div class="bottom-button">召喚</div>
+                <div class="bottom-button">設計</div>
+            </div>
+        </div>
+    </div>
+	    <script>
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        const radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['HP', '攻擊力', '防禦力', '命中', '迴避', '幸運'],
+                datasets: [{
+                    label: '角色能力',
+                    data: [176, 473, 123, 107, 10, 314], // 初始數值
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    pointHoverBorderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true, // 顯示角度線
+                            color: 'rgba(255, 255, 255, 0.8)', // 角度線顏色
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.8)', // 網格線顏色
+                        },
+                        pointLabels: {
+                            display: false, // 隱藏標籤
+                            font: {
+                                size: 12,
+                                color: '#fff', // 標籤顏色
+                            }
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            max: 10, // 設定最大值，根據遊戲內數值調整
+                            stepSize: 100, // 設定刻度間隔
+                            showLabelBackdrop: false, // 不顯示刻度標籤的背景
+                            font: {
+                                size: 10,
+                                color: '#fff', // 刻度值顏色
+                            }
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 12,
+                                color: '#fff',
+                            },
+                        }
+                    },
+                },
+            }
+        });
+
+        // 獲取 DOM 元素
+        //const equipmentMenu = document.querySelector('.equipment-menu');
+        //const equipmentMenuToggle = document.querySelector('.equipment-menu-toggle');
+        const affinityNameDisplay = document.getElementById('character-name');
+        //const levelDisplay = document.getElementById('level');
+        //const expDisplay = document.getElementById('exp');
+        //const hpDisplay = document.getElementById('hp');
+        //const attackDisplay = document.getElementById('attack');
+        //const defenseDisplay = document.getElementById('defense');
+        //const hitDisplay = document.getElementById('hit');
+        //const dodgeDisplay = document.getElementById('dodge');
+        //const luckDisplay = document.getElementById('luck');
+        //const movementDisplay = document.getElementById('movement');
+		//const characterImage = document.getElementById('atcor'); // 獲取角色圖片元素
+		
+        // 卡片資料
+        const cardData = {
+            card1: {
+                character: '魔恩',
+                hp: 2,
+                attack: 10,
+                defense: 5,
+                hit: 2,
+                dodge: 7,
+                luck: 8,
+                movement: 4,
+				imageUrl: 'stay1.gif' // 添加圖片 URL
+            },
+            card2: {
+                character: '忘了',
+                hp: 10,
+                attack: 8,
+                defense: 8,
+                hit: 8,
+                dodge: 5,
+                luck: 3,
+                movement: 3,
+				imageUrl: 'stay2.gif' // 添加圖片 URL
+            },
+            card3: {
+                character: '凱蒂',
+                hp: 2,
+                attack: 5,
+                defense: 7,
+                hit: 8,
+                dodge: 4,
+                luck: 5,
+                movement: 5,
+				imageUrl: 'stay3.gif' // 添加圖片 URL
+            },
+            card4: {
+                character: '誰啊',
+                hp: 5,
+                attack: 10,
+                defense: 10,
+                hit: 4,
+                dodge: 7,
+                luck: 3,
+                movement: 4,
+				imageUrl: 'stay4.gif' // 添加圖片 URL
+            }
+        };
+
+        // 為切換按鈕添加點擊事件監聽器
+        //equipmentMenuToggle.addEventListener('click', () => {
+        //    equipmentMenu.classList.toggle('open'); // 切換 open 類來顯示/隱藏選單
+            // 切換按鈕的文字方向
+        //    equipmentMenuToggle.textContent = equipmentMenu.classList.contains('open') ? '◀' : '▶';
+        //});
+
+        // 為卡片添加點擊事件
+        document.querySelectorAll('.character-avatar').forEach(card => {
+            card.addEventListener('click', () => {
+                const cardDataName = card.dataset.card; // 獲取 data-card 屬性值
+                if (cardData[cardDataName]) {
+                    updateCharacterInfo(cardData[cardDataName]);
+                }
+            });
+        });
+
+        // 更新角色資訊的函式
+        function updateCharacterInfo(data) {
+            affinityNameDisplay.textContent = `${data.character}`;
+            <!-- levelDisplay.textContent = `Lv：80`; // 等級保持不變 -->
+            <!-- expDisplay.textContent = `EXP：0%`; // 經驗值保持不變 -->
+            <!-- hpDisplay.textContent = `HP：(+411) ${data.hp}/176`; // 替換成新的 hp -->
+            <!-- attackDisplay.textContent = `攻擊力：(+128) ${data.attack} + 372`; // 替換成新的 攻擊力 -->
+            <!-- defenseDisplay.textContent = `防禦力：(+108) ${data.defense} + 257`; // 替換成新的 防禦力 -->
+            <!-- hitDisplay.textContent = `命中：(+64) ${data.hit} + 143`; // 替換成新的 命中 -->
+            <!-- dodgeDisplay.textContent = `迴避：(+34) ${data.dodge}`; // 替換成新的 迴避 -->
+            <!-- luckDisplay.textContent = `幸運：(+39) ${data.luck} + 151`; // 替換成新的 幸運 -->
+            <!-- movementDisplay.textContent = `移動力：${data.movement} + 1`; // 替換成新的 移動力 -->
+            <!-- characterImage.src = `${data.imageUrl}`; // 更新角色圖片 -->
+
+            <!-- // 更新雷達圖 -->
+            <!-- radarChart.data.datasets[0].data = [data.hp, data.attack, data.defense, data.hit, data.dodge, data.luck]; -->
+            <!-- radarChart.update(); -->
+        }
+		
+		// 添加播放音樂的功能
+        <!-- document.getElementById('playMusic').addEventListener('click', function () { -->
+            <!-- const bgMusic = document.getElementById('bgMusic'); -->
+            <!-- bgMusic.play(); -->
+            <!-- this.textContent = '音樂已播放'; -->
+            <!-- this.disabled = true; -->
+        <!-- }); -->
+		
+    </script>
+</body>
+</html>
