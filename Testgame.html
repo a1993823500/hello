@@ -55,6 +55,24 @@
             color: #FFD700;
         }
 
+        /* 添加時間顯示樣式 */
+        .timer {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .timer.warning {
+            color: #ff4757;
+            animation: timerPulse 1s infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
         .game-area {
             position: relative;
             height: 400px;
@@ -294,6 +312,7 @@
 <body>
     <div class="header">
         <h1>🥁 太鼓達人 - 節拍遊戲</h1>
+        <div class="timer" id="timer">01:00</div>
         <div class="score-board">
             <div class="score-item">
                 <span>分數</span>
@@ -325,7 +344,7 @@
 
     <div class="controls">
         <div style="margin-bottom: 15px;">
-            <strong>操作說明：</strong> 按 A 鍵擊打紅色音符，按 D 鍵擊打藍色音符
+            <strong>操作說明：</strong> 按 A 鍵擊打紅色音符，按 D 鍵擊打藍色音符 - <strong>遊戲時長：1分鐘</strong>
         </div>
         <div class="control-buttons">
             <button class="control-btn red-btn" id="redBtn">A - 紅色</button>
@@ -376,6 +395,7 @@
                 this.hitZone = document.querySelector('.hit-zone');
                 this.judgment = document.getElementById('judgment');
                 this.comboElement = document.getElementById('combo');
+                this.timerElement = document.getElementById('timer');
                 
                 this.scoreElements = {
                     score: document.getElementById('score'),
@@ -388,6 +408,11 @@
                 this.gameRunning = false;
                 this.noteSpeed = 3000;
                 this.spawnInterval = 1500;
+                
+                // 新增時間相關屬性
+                this.gameDuration = 60; // 遊戲時長：60秒（1分鐘）
+                this.timeLeft = this.gameDuration;
+                this.gameTimer = null;
                 
                 this.stats = {
                     score: 0,
@@ -413,6 +438,7 @@
                 this.setupKeyboard();
                 this.initializeSounds();
                 this.setupSoundControls();
+                this.updateTimerDisplay();
             }
 
             initializeControls() {
@@ -507,6 +533,38 @@
                 btn.classList.remove('active');
             }
 
+            // 新增時間相關方法
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                this.timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // 當剩餘時間少於10秒時，添加警告樣式
+                if (this.timeLeft <= 10) {
+                    this.timerElement.classList.add('warning');
+                } else {
+                    this.timerElement.classList.remove('warning');
+                }
+            }
+
+            startGameTimer() {
+                this.gameTimer = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateTimerDisplay();
+                    
+                    if (this.timeLeft <= 0) {
+                        this.timeUp();
+                    }
+                }, 1000);
+            }
+
+            timeUp() {
+                this.stopGame();
+                setTimeout(() => {
+                    alert('時間到！遊戲結束！');
+                }, 100);
+            }
+
             toggleGame() {
                 if (this.gameRunning) {
                     this.stopGame();
@@ -517,10 +575,15 @@
 
             startGame() {
                 this.gameRunning = true;
+                this.timeLeft = this.gameDuration; // 重設時間
                 this.resetStats();
                 this.updateUI();
+                this.updateTimerDisplay();
                 
                 document.getElementById('startBtn').textContent = '停止遊戲';
+                
+                // 開始計時
+                this.startGameTimer();
                 
                 this.spawnNote();
                 this.gameLoop = setInterval(() => this.spawnNote(), this.spawnInterval);
@@ -528,6 +591,13 @@
 
             stopGame() {
                 this.gameRunning = false;
+                
+                // 停止計時器
+                if (this.gameTimer) {
+                    clearInterval(this.gameTimer);
+                    this.gameTimer = null;
+                }
+                
                 clearInterval(this.gameLoop);
                 
                 this.notes.forEach(note => {
@@ -539,6 +609,11 @@
                 this.notes = [];
                 
                 document.getElementById('startBtn').textContent = '開始遊戲';
+                
+                // 重設時間顯示
+                this.timeLeft = this.gameDuration;
+                this.updateTimerDisplay();
+                
                 this.showFinalScore();
             }
 
