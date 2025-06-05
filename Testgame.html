@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太鼓達人 - 節拍遊戲</title>
+    <style>
+        /* ... 保持之前的所有CSS樣式 ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-board {
+            display: flex;
+            gap: 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-value {
+            font-size: 24px;
+            color: #FFD700;
+        }
+
+        .game-area {
+            position: relative;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            margin: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .track {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+            border-top: 2px solid rgba(255, 255, 255, 0.5);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .hit-zone {
+            position: absolute;
+            left: 150px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 120px;
+            height: 120px;
+            border: 4px solid #FFD700;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            z-index: 10;
+        }
+
+        .note {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .note.red {
+            background: radial-gradient(circle, #ff4757, #c23616);
+        }
+
+        .note.blue {
+            background: radial-gradient(circle, #3742fa, #2f3542);
+        }
+
+        .judgment {
+            position: absolute;
+            left: 50%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .judgment.perfect {
+            color: #FFD700;
+        }
+
+        .judgment.good {
+            color: #00ff00;
+        }
+
+        .judgment.miss {
+            color: #ff0000;
+        }
+
+        .controls {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            color: white;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: 2px solid;
+            border-radius: 50px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .red-btn {
+            border-color: #ff4757;
+            color: #ff4757;
+        }
+
+        .red-btn:hover, .red-btn.active {
+            background: #ff4757;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .blue-btn {
+            border-color: #3742fa;
+            color: #3742fa;
+        }
+
+        .blue-btn:hover, .blue-btn.active {
+            background: #3742fa;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .start-btn {
+            border-color: #2ed573;
+            color: #2ed573;
+            margin-top: 20px;
+        }
+
+        .start-btn:hover {
+            background: #2ed573;
+            color: white;
+        }
+
+        .combo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            z-index: 50;
+        }
+
+        .sound-controls {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-slider {
+            width: 100px;
+            accent-color: #FFD700;
+        }
+
+        .sound-toggle {
+            padding: 8px 16px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sound-toggle.muted {
+            background: #ff4757;
+        }
+
+        @keyframes noteMove {
+            from {
+                right: -100px;
+            }
+            to {
+                right: 100%;
+            }
+        }
+
+        @keyframes hitEffect {
+            0% {
+                transform: translateY(-50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes judgmentShow {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .hit-effect {
+            animation: hitEffect 0.3s ease-out;
+        }
+
+        .judgment.show {
+            animation: judgmentShow 1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🥁 太鼓達人 - 節拍遊戲</h1>
+        <div class="score-board">
+            <div class="score-item">
+                <span>分數</span>
+                <span class="score-value" id="score">0</span>
+            </div>
+            <div class="score-item">
+                <span>Perfect</span>
+                <span class="score-value" id="perfect">0</span>
+            </div>
+            <div class="score-item">
+                <span>Good</span>
+                <span class="score-value" id="good">0</span>
+            </div>
+            <div class="score-item">
+                <span>Miss</span>
+                <span class="score-value" id="miss">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="game-area">
+            <div class="track"></div>
+            <div class="hit-zone"></div>
+            <div class="judgment" id="judgment"></div>
+            <div class="combo" id="combo"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div style="margin-bottom: 15px;">
+            <strong>操作說明：</strong> 按 A 鍵擊打紅色音符，按 D 鍵擊打藍色音符
+        </div>
+        <div class="control-buttons">
+            <button class="control-btn red-btn" id="redBtn">A - 紅色</button>
+            <button class="control-btn blue-btn" id="blueBtn">D - 藍色</button>
+        </div>
+        <div class="sound-controls">
+            <button class="sound-toggle" id="soundToggle">🔊 音效開啟</button>
+            <div class="volume-control">
+                <span>音量:</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span id="volumeDisplay">70%</span>
+            </div>
+        </div>
+        <button class="control-btn start-btn" id="startBtn">開始遊戲</button>
+    </div>
+
+    <!-- 音效檔案 - 直接引用檔案路徑 -->
+    <audio id="redHitSound" preload="auto">
+        <source src="sounds/red-hit.mp3" type="audio/mpeg">
+        <source src="sounds/red-hit.wav" type="audio/wav">
+        <source src="sounds/red-hit.ogg" type="audio/ogg">
+    </audio>
+    <audio id="blueHitSound" preload="auto">
+        <source src="sounds/blue-hit.mp3" type="audio/mpeg">
+        <source src="sounds/blue-hit.wav" type="audio/wav">
+        <source src="sounds/blue-hit.ogg" type="audio/ogg">
+    </audio>
+    <audio id="perfectSound" preload="auto">
+        <source src="sounds/perfect.mp3" type="audio/mpeg">
+        <source src="sounds/perfect.wav" type="audio/wav">
+        <source src="sounds/perfect.ogg" type="audio/ogg">
+    </audio>
+    <audio id="goodSound" preload="auto">
+        <source src="sounds/good.mp3" type="audio/mpeg">
+        <source src="sounds/good.wav" type="audio/wav">
+        <source src="sounds/good.ogg" type="audio/ogg">
+    </audio>
+    <audio id="missSound" preload="auto">
+        <source src="sounds/miss.mp3" type="audio/mpeg">
+        <source src="sounds/miss.wav" type="audio/wav">
+        <source src="sounds/miss.ogg" type="audio/ogg">
+    </audio>
+
+    <script>
+        class TaikoGame {
+            constructor() {
+                this.gameArea = document.querySelector('.game-area');
+                this.hitZone = document.querySelector('.hit-zone');
+                this.judgment = document.getElementById('judgment');
+                this.comboElement = document.getElementById('combo');
+                
+                this.scoreElements = {
+                    score: document.getElementById('score'),
+                    perfect: document.getElementById('perfect'),
+                    good: document.getElementById('good'),
+                    miss: document.getElementById('miss')
+                };
+
+                this.notes = [];
+                this.gameRunning = false;
+                this.noteSpeed = 3000;
+                this.spawnInterval = 1500;
+                
+                this.stats = {
+                    score: 0,
+                    perfect: 0,
+                    good: 0,
+                    miss: 0,
+                    combo: 0,
+                    maxCombo: 0
+                };
+
+                this.sounds = {
+                    red: document.getElementById('redHitSound'),
+                    blue: document.getElementById('blueHitSound'),
+                    perfect: document.getElementById('perfectSound'),
+                    good: document.getElementById('goodSound'),
+                    miss: document.getElementById('missSound')
+                };
+
+                this.soundEnabled = true;
+                this.volume = 0.7;
+
+                this.initializeControls();
+                this.setupKeyboard();
+                this.initializeSounds();
+                this.setupSoundControls();
+            }
+
+            initializeControls() {
+                const startBtn = document.getElementById('startBtn');
+                const redBtn = document.getElementById('redBtn');
+                const blueBtn = document.getElementById('blueBtn');
+
+                startBtn.addEventListener('click', () => this.toggleGame());
+                redBtn.addEventListener('click', () => this.hitNote('red'));
+                blueBtn.addEventListener('click', () => this.hitNote('blue'));
+            }
+
+            setupKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    if (!this.gameRunning) return;
+                    
+                    switch(e.key.toLowerCase()) {
+                        case 'a':
+                            this.hitNote('red');
+                            this.showButtonPress('red');
+                            break;
+                        case 'd':
+                            this.hitNote('blue');
+                            this.showButtonPress('blue');
+                            break;
+                    }
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    switch(e.key.toLowerCase()) {
+                        case 'a':
+                            this.hideButtonPress('red');
+                            break;
+                        case 'd':
+                            this.hideButtonPress('blue');
+                            break;
+                    }
+                });
+            }
+
+            initializeSounds() {
+                Object.values(this.sounds).forEach(sound => {
+                    sound.volume = this.volume;
+                    
+                    // 音效載入錯誤處理
+                    sound.addEventListener('error', (e) => {
+                        console.log('音效載入失敗:', sound.src);
+                    });
+                });
+            }
+
+            setupSoundControls() {
+                const soundToggle = document.getElementById('soundToggle');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const volumeDisplay = document.getElementById('volumeDisplay');
+
+                soundToggle.addEventListener('click', () => {
+                    this.soundEnabled = !this.soundEnabled;
+                    soundToggle.textContent = this.soundEnabled ? '🔊 音效開啟' : '🔇 音效關閉';
+                    soundToggle.classList.toggle('muted', !this.soundEnabled);
+                });
+
+                volumeSlider.addEventListener('input', (e) => {
+                    this.volume = e.target.value / 100;
+                    volumeDisplay.textContent = e.target.value + '%';
+                    
+                    Object.values(this.sounds).forEach(sound => {
+                        sound.volume = this.volume;
+                    });
+                });
+            }
+
+            playSound(soundType) {
+                if (!this.soundEnabled) return;
+                
+                const sound = this.sounds[soundType];
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(e => {
+                        console.log('音效播放失敗:', e);
+                    });
+                }
+            }
+
+            showButtonPress(color) {
+                const btn = color === 'red' ? document.getElementById('redBtn') : document.getElementById('blueBtn');
+                btn.classList.add('active');
+            }
+
+            hideButtonPress(color) {
+                const btn = color === 'red' ? document.getElementById('redBtn') : document.getElementById('blueBtn');
+                btn.classList.remove('active');
+            }
+
+            toggleGame() {
+                if (this.gameRunning) {
+                    this.stopGame();
+                } else {
+                    this.startGame();
+                }
+            }
+
+            startGame() {
+                this.gameRunning = true;
+                this.resetStats();
+                this.updateUI();
+                
+                document.getElementById('startBtn').textContent = '停止遊戲';
+                
+                this.spawnNote();
+                this.gameLoop = setInterval(() => this.spawnNote(), this.spawnInterval);
+            }
+
+            stopGame() {
+                this.gameRunning = false;
+                clearInterval(this.gameLoop);
+                
+                this.notes.forEach(note => {
+                    if (note.element && note.element.parentNode) {
+                        note.element.parentNode.removeChild(note.element);
+                    }
+                    clearTimeout(note.timeout);
+                });
+                this.notes = [];
+                
+                document.getElementById('startBtn').textContent = '開始遊戲';
+                this.showFinalScore();
+            }
+
+            resetStats() {
+                this.stats = {
+                    score: 0,
+                    perfect: 0,
+                    good: 0,
+                    miss: 0,
+                    combo: 0,
+                    maxCombo: 0
+                };
+            }
+
+            spawnNote() {
+                if (!this.gameRunning) return;
+                
+                const colors = ['red', 'blue'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                const note = this.createNote(color);
+                this.notes.push(note);
+                
+                note.timeout = setTimeout(() => {
+                    this.removeNote(note, true);
+                }, this.noteSpeed + 500);
+            }
+
+            createNote(color) {
+                const noteElement = document.createElement('div');
+                noteElement.className = `note ${color}`;
+                noteElement.textContent = color === 'red' ? 'A' : 'D';
+                noteElement.style.right = '-100px';
+                noteElement.style.animation = `noteMove ${this.noteSpeed}ms linear`;
+                
+                this.gameArea.appendChild(noteElement);
+                
+                return {
+                    element: noteElement,
+                    color: color,
+                    startTime: Date.now(),
+                    timeout: null
+                };
+            }
+
+            hitNote(inputColor) {
+                if (!this.gameRunning) return;
+                
+                this.playSound(inputColor);
+                
+                const hitZoneLeft = 150;
+                const hitZoneCenter = hitZoneLeft + 60;
+                let closestNote = null;
+                let minDistance = Infinity;
+                
+                this.notes.forEach(note => {
+                    if (note.color === inputColor) {
+                        const noteRect = note.element.getBoundingClientRect();
+                        const gameAreaRect = this.gameArea.getBoundingClientRect();
+                        const noteCenter = noteRect.left - gameAreaRect.left + 40;
+                        const distance = Math.abs(noteCenter - hitZoneCenter);
+                        
+                        if (distance < minDistance && distance < 120) {
+                            minDistance = distance;
+                            closestNote = note;
+                        }
+                    }
+                });
+                
+                if (closestNote) {
+                    this.evaluateHit(closestNote, minDistance);
+                    this.removeNote(closestNote, false);
+                } else {
+                    this.resetCombo();
+                }
+            }
+
+            evaluateHit(note, distance) {
+                let judgment;
+                let points;
+                
+                if (distance < 30) {
+                    judgment = 'perfect';
+                    points = 100;
+                    this.stats.perfect++;
+                    this.playSound('perfect');
+                } else if (distance < 60) {
+                    judgment = 'good';
+                    points = 50;
+                    this.stats.good++;
+                    this.playSound('good');
+                } else {
+                    judgment = 'miss';
+                    points = 0;
+                    this.stats.miss++;
+                    this.playSound('miss');
+                }
+                
+                if (judgment !== 'miss') {
+                    this.stats.combo++;
+                    if (this.stats.combo > this.stats.maxCombo) {
+                        this.stats.maxCombo = this.stats.combo;
+                    }
+                    points += Math.floor(this.stats.combo / 10) * 10;
+                } else {
+                    this.resetCombo();
+                }
+                
+                this.stats.score += points;
+                this.showJudgment(judgment);
+                this.updateUI();
+                
+                this.hitZone.classList.add('hit-effect');
+                setTimeout(() => this.hitZone.classList.remove('hit-effect'), 300);
+            }
+
+            resetCombo() {
+                this.stats.combo = 0;
+                this.updateComboDisplay();
+            }
+
+            removeNote(note, isMiss = false) {
+                if (isMiss && this.gameRunning) {
+                    this.stats.miss++;
+                    this.resetCombo();
+                    this.showJudgment('miss');
+                    this.playSound('miss');
+                    this.updateUI();
+                }
+                
+                const index = this.notes.indexOf(note);
+                if (index > -1) {
+                    this.notes.splice(index, 1);
+                }
+                
+                if (note.element && note.element.parentNode) {
+                    note.element.parentNode.removeChild(note.element);
+                }
+                
+                if (note.timeout) {
+                    clearTimeout(note.timeout);
+                }
+            }
+
+            showJudgment(type) {
+                const judgmentTexts = {
+                    perfect: 'PERFECT!',
+                    good: 'GOOD!',
+                    miss: 'MISS...'
+                };
+                
+                this.judgment.textContent = judgmentTexts[type];
+                this.judgment.className = `judgment ${type} show`;
+                
+                setTimeout(() => {
+                    this.judgment.classList.remove('show');
+                }, 1000);
+            }
+
+            updateUI() {
+                this.scoreElements.score.textContent = this.stats.score.toLocaleString();
+                this.scoreElements.perfect.textContent = this.stats.perfect;
+                this.scoreElements.good.textContent = this.stats.good;
+                this.scoreElements.miss.textContent = this.stats.miss;
+                this.updateComboDisplay();
+            }
+
+            updateComboDisplay() {
+                if (this.stats.combo > 0) {
+                    this.comboElement.textContent = `${this.stats.combo} COMBO!`;
+                    this.comboElement.style.display = 'block';
+                } else {
+                    this.comboElement.style.display = 'none';
+                }
+            }
+
+            showFinalScore() {
+                const accuracy = this.stats.perfect + this.stats.good + this.stats.miss > 0 
+                    ? ((this.stats.perfect + this.stats.good) / (this.stats.perfect + this.stats.good + this.stats.miss) * 100).toFixed(1)
+                    : 0;
+                
+                setTimeout(() => {
+                    alert(`遊戲結束！\n\n最終分數: ${this.stats.score.toLocaleString()}\n準確率: ${accuracy}%\n最高連擊: ${this.stats.maxCombo}\n\nPerfect: ${this.stats.perfect}\nGood: ${this.stats.good}\nMiss: ${this.stats.miss}`);
+                }, 500);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            new TaikoGame();
+        });
+    </script>
+</body>
+</html>
